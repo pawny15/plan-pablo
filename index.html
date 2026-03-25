@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Plan Pablo">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230e0e0e'/><text y='.9em' font-size='80' x='10'>🥊</text></svg>">
+<title>Plan Nutricional – Pablo · Meta 68 kg</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0e; --surface: #161616; --surface2: #1e1e1e; --border: #2a2a2a;
+    --accent: #c8f04a; --accent2: #f0a83a; --red: #e84040; --blue: #5a8aff;
+    --purple: #c084fc; --pink: #f472b6; --cheat: #ff6b35; --text: #f0ede8; --muted: #888; --radius: 12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; font-weight:300; line-height:1.6; min-height:100vh; }
+
+  header { background:var(--surface); border-bottom:1px solid var(--border); padding:36px 40px 28px; position:relative; overflow:hidden; }
+  header::before { content:''; position:absolute; top:-60px; right:-60px; width:280px; height:280px; background:radial-gradient(circle,rgba(200,240,74,0.12) 0%,transparent 70%); pointer-events:none; }
+  .header-tag { font-size:10px; font-weight:700; letter-spacing:0.25em; text-transform:uppercase; color:var(--accent); margin-bottom:10px; }
+  header h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(48px,8vw,80px); letter-spacing:0.04em; line-height:0.9; }
+  header h1 span { color:var(--accent); }
+  .header-sub { font-size:13px; color:var(--muted); margin-top:14px; font-weight:400; }
+
+  .stats-bar { display:grid; grid-template-columns:repeat(5,1fr); border-bottom:1px solid var(--border); }
+  .stat { padding:20px 24px; border-right:1px solid var(--border); text-align:center; }
+  .stat:last-child { border-right:none; }
+  .stat-val { font-family:'Bebas Neue',sans-serif; font-size:32px; color:var(--accent); letter-spacing:0.05em; line-height:1; }
+  .stat-label { font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); margin-top:4px; font-weight:500; }
+
+  .main { padding:32px 40px; max-width:1200px; margin:0 auto; }
+  .section-title { font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:0.3em; text-transform:uppercase; color:var(--accent); margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+
+  .day-tabs { display:flex; gap:8px; margin-bottom:28px; flex-wrap:wrap; }
+  .day-tab { padding:8px 18px; border-radius:99px; border:1px solid var(--border); background:transparent; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:12px; font-weight:500; letter-spacing:0.08em; cursor:pointer; transition:all 0.2s; text-transform:uppercase; }
+  .day-tab:hover { border-color:var(--accent); color:var(--accent); }
+  .day-tab.active { background:var(--accent); color:#0e0e0e; border-color:var(--accent); font-weight:700; }
+  .day-tab.rest-tab.active { background:var(--accent2); border-color:var(--accent2); }
+  .day-tab.cheat-tab.active { background:var(--cheat); border-color:var(--cheat); color:#fff; }
+
+  .plan-panel { display:none; }
+  .plan-panel.active { display:block; }
+
+  .kcal-badge { display:inline-flex; align-items:center; gap:10px; background:var(--surface2); border:1px solid var(--border); border-radius:99px; padding:6px 16px 6px 10px; margin-bottom:24px; }
+  .kcal-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); }
+  .kcal-dot.orange { background:var(--accent2); }
+  .kcal-dot.cheat { background:var(--cheat); }
+  .kcal-badge span { font-size:12px; font-weight:500; }
+
+  .macros-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:32px; }
+  .macro-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; text-align:center; }
+  .macro-val { font-family:'Bebas Neue',sans-serif; font-size:36px; line-height:1; letter-spacing:0.03em; }
+  .macro-val.pro { color:var(--blue); } .macro-val.carb { color:var(--accent2); }
+  .macro-val.fat { color:var(--purple); } .macro-val.kcal { color:var(--accent); }
+  .macro-val.cheat-kcal { color:var(--cheat); }
+  .macro-unit { font-size:10px; color:var(--muted); margin-top:3px; text-transform:uppercase; letter-spacing:0.12em; }
+
+  .meal-block { margin-bottom:28px; }
+  .meal-block-header { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+  .meal-block-time { font-family:'Bebas Neue',sans-serif; font-size:11px; letter-spacing:0.2em; color:var(--muted); }
+  .meal-block-title { font-size:16px; font-weight:700; }
+  .meal-block-kcal { margin-left:auto; font-size:11px; color:var(--muted); font-weight:500; }
+
+  .opt-tabs { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+  .opt-tab { padding:5px 13px; border-radius:99px; border:1px solid var(--border); background:transparent; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:11px; font-weight:500; cursor:pointer; transition:all 0.15s; }
+  .opt-tab:hover { border-color:#555; color:var(--text); }
+  .opt-tab.active { background:var(--surface2); border-color:#555; color:var(--text); font-weight:700; }
+
+  .opt-panel { display:none; }
+  .opt-panel.active { display:block; }
+
+  .meal-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; position:relative; overflow:hidden; }
+  .meal-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+  .color-orange::before { background:var(--accent2); }
+  .color-green::before { background:var(--accent); }
+  .color-blue::before { background:var(--blue); }
+  .color-purple::before { background:var(--purple); }
+  .color-pink::before { background:var(--pink); }
+  .color-cheat::before { background:var(--cheat); }
+
+  .opt-name { font-size:14px; font-weight:700; margin-bottom:10px; }
+  .meal-items { list-style:none; }
+  .meal-items li { display:flex; justify-content:space-between; align-items:flex-start; padding:5px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .meal-items li:last-child { border-bottom:none; }
+  .item-name { color:var(--text); font-weight:400; flex:1; }
+  .item-qty { color:var(--accent); font-weight:700; font-size:12px; white-space:nowrap; margin-left:12px; }
+  .meal-kcal { margin-top:10px; font-size:11px; color:var(--muted); font-weight:500; }
+  .item-note { font-size:11px; color:var(--muted); margin-top:6px; font-style:italic; }
+
+  .note-box { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent2); border-radius:var(--radius); padding:14px 18px; margin-bottom:28px; font-size:13px; color:var(--muted); line-height:1.6; }
+  .note-box strong { color:var(--text); }
+
+  .supplement-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:32px; }
+  .suppl-pill { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px; }
+  .suppl-icon { font-size:18px; }
+  .suppl-name { font-size:13px; font-weight:700; }
+  .suppl-when { font-size:11px; color:var(--muted); }
+
+  .swaps-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:32px; }
+  .swap-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 18px; flex:1; min-width:200px; }
+  .swap-title { font-size:11px; text-transform:uppercase; letter-spacing:0.15em; color:var(--muted); margin-bottom:8px; }
+  .swap-row { display:flex; gap:8px; align-items:center; margin-bottom:4px; font-size:13px; }
+  .swap-no { color:var(--red); font-weight:600; }
+  .swap-yes { color:var(--accent); font-weight:600; }
+  .swap-note { font-size:11px; color:var(--muted); margin-top:8px; font-style:italic; }
+
+  .tips-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:32px; }
+  .tip-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
+  .tip-icon { font-size:22px; margin-bottom:8px; }
+  .tip-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--accent); margin-bottom:6px; }
+  .tip-text { font-size:12px; color:var(--muted); line-height:1.5; }
+
+  /* CHEAT MEAL CARD */
+  .cheat-card { background:var(--surface); border:1px solid var(--cheat); border-radius:var(--radius); padding:24px; margin-bottom:32px; position:relative; overflow:hidden; }
+  .cheat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--cheat); }
+  .cheat-glow { position:absolute; top:-40px; right:-40px; width:160px; height:160px; background:radial-gradient(circle,rgba(255,107,53,0.15) 0%,transparent 70%); pointer-events:none; }
+  .cheat-title { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--cheat); letter-spacing:0.05em; margin-bottom:6px; }
+  .cheat-subtitle { font-size:12px; color:var(--muted); margin-bottom:20px; }
+  .cheat-rules { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .cheat-rule { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
+  .cheat-rule-icon { font-size:20px; margin-bottom:6px; }
+  .cheat-rule-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--text); margin-bottom:4px; }
+  .cheat-rule-text { font-size:12px; color:var(--muted); line-height:1.4; }
+  .cheat-rule.ok { border-color:rgba(200,240,74,0.3); }
+  .cheat-rule.no { border-color:rgba(232,64,64,0.3); }
+  .cheat-options { margin-top:16px; display:flex; gap:8px; flex-wrap:wrap; }
+  .cheat-option-pill { background:rgba(255,107,53,0.12); border:1px solid rgba(255,107,53,0.3); border-radius:99px; padding:6px 14px; font-size:12px; color:var(--cheat); font-weight:500; }
+  .cheat-when { margin-top:16px; background:rgba(255,107,53,0.08); border:1px solid rgba(255,107,53,0.2); border-radius:8px; padding:12px 14px; font-size:12px; color:var(--muted); }
+
+  /* PROGRESS CHART */
+  .progress-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:32px; }
+  .progress-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:gap; gap:12px; }
+  .progress-title { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:0.1em; color:var(--text); }
+  .progress-subtitle { font-size:11px; color:var(--muted); margin-top:2px; }
+  .add-weight-form { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .weight-input { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 14px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:13px; width:90px; outline:none; transition:border-color 0.2s; }
+  .weight-input:focus { border-color:var(--accent); }
+  .add-btn { background:var(--accent); color:#0e0e0e; border:none; border-radius:8px; padding:8px 16px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:700; cursor:pointer; letter-spacing:0.05em; transition:opacity 0.2s; white-space:nowrap; }
+  .add-btn:hover { opacity:0.85; }
+  .del-btn { background:transparent; color:var(--red); border:1px solid rgba(232,64,64,0.3); border-radius:8px; padding:8px 12px; font-family:'DM Sans',sans-serif; font-size:11px; cursor:pointer; transition:all 0.2s; }
+  .del-btn:hover { background:rgba(232,64,64,0.1); }
+
+  .chart-container { position:relative; width:100%; height:220px; margin-bottom:16px; }
+  canvas#weightChart { width:100% !important; height:100% !important; }
+
+  .progress-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:16px; }
+  .prog-stat { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px; text-align:center; }
+  .prog-stat-val { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:0.03em; line-height:1; }
+  .prog-stat-label { font-size:10px; color:var(--muted); margin-top:3px; text-transform:uppercase; letter-spacing:0.12em; }
+  .prog-stat-val.lost { color:var(--accent); }
+  .prog-stat-val.remain { color:var(--accent2); }
+  .prog-stat-val.weeks { color:var(--blue); }
+  .prog-stat-val.pace { color:var(--purple); }
+
+  .log-list { margin-top:12px; max-height:140px; overflow-y:auto; }
+  .log-entry { display:flex; justify-content:space-between; align-items:center; padding:7px 10px; border-radius:6px; font-size:12px; margin-bottom:4px; background:var(--surface2); }
+  .log-date { color:var(--muted); }
+  .log-weight { color:var(--text); font-weight:700; }
+  .log-diff { font-size:11px; font-weight:700; }
+  .log-diff.down { color:var(--accent); }
+  .log-diff.up { color:var(--red); }
+  .log-diff.same { color:var(--muted); }
+  .log-del { background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:0 4px; transition:color 0.2s; }
+  .log-del:hover { color:var(--red); }
+  .empty-chart { text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; }
+
+  footer { background:var(--surface); border-top:1px solid var(--border); padding:20px 40px; text-align:center; font-size:11px; color:var(--muted); }
+
+  /* PWA install banner */
+  .install-banner { background:var(--surface); border:1px solid var(--accent); border-radius:var(--radius); padding:14px 20px; margin-bottom:20px; display:none; align-items:center; gap:14px; }
+  .install-banner.visible { display:flex; }
+  .install-banner-text { font-size:13px; flex:1; }
+  .install-banner-text strong { color:var(--accent); }
+  .install-banner-btn { background:var(--accent); color:#0e0e0e; border:none; border-radius:8px; padding:8px 14px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
+  .install-banner-close { background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:18px; line-height:1; }
+
+  @media(max-width:700px) {
+    .stats-bar { grid-template-columns:repeat(3,1fr); }
+    .macros-row { grid-template-columns:repeat(2,1fr); }
+    .tips-grid { grid-template-columns:1fr 1fr; }
+    header,.main { padding:24px 20px; }
+    .swaps-row { flex-direction:column; }
+    .cheat-rules { grid-template-columns:1fr; }
+    .progress-stats { grid-template-columns:repeat(2,1fr); }
+    .progress-header { flex-direction:column; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">Plan Personalizado · MMA + Fuerza · Meta 68 kg · 3 meses</div>
+  <h1>PLAN<br><span>NUTRICIONAL</span></h1>
+  <div class="header-sub">Pablo · 27 años · 80 kg → <strong style="color:var(--accent)">68 kg</strong> · 1.72 m · MMA Mar/Jue/Vie 09:00–10:20 · Deporte 5–6×/semana · Pesas siempre en <strong style="color:var(--accent)">CRUDO</strong></div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-val">80</div><div class="stat-label">Peso actual (kg)</div></div>
+  <div class="stat"><div class="stat-val" style="color:var(--accent)">68</div><div class="stat-label">Meta (kg)</div></div>
+  <div class="stat"><div class="stat-val" style="color:var(--accent2)">−12</div><div class="stat-label">A perder (kg)</div></div>
+  <div class="stat"><div class="stat-val" style="color:var(--blue)">1900</div><div class="stat-label">TMB estimada</div></div>
+  <div class="stat"><div class="stat-val" style="color:var(--purple)">~13</div><div class="stat-label">Semanas meta</div></div>
+</div>
+
+<div class="main">
+
+  <!-- INSTALL BANNER -->
+  <div class="install-banner" id="installBanner">
+    <span style="font-size:22px">📲</span>
+    <div class="install-banner-text"><strong>Agregar a iPhone</strong> — Toca Compartir → "Agregar a pantalla de inicio" para tenerlo como app.</div>
+    <button class="install-banner-close" onclick="document.getElementById('installBanner').classList.remove('visible')">×</button>
+  </div>
+
+  <!-- PROGRESS CHART -->
+  <div class="section-title">📊 Progreso semanal de peso</div>
+  <div class="progress-section">
+    <div class="progress-header">
+      <div>
+        <div class="progress-title">Registro de Peso</div>
+        <div class="progress-subtitle">Pésate 1 vez/semana · mismo día · misma hora · en ayunas</div>
+      </div>
+      <div class="add-weight-form">
+        <input class="weight-input" type="number" id="weightVal" placeholder="ej. 79.2" step="0.1" min="50" max="150">
+        <button class="add-btn" onclick="addWeight()">+ Registrar</button>
+        <button class="del-btn" onclick="clearLast()">Borrar último</button>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="weightChart"></canvas>
+      <div class="empty-chart" id="emptyChart">
+        <div style="font-size:32px;margin-bottom:8px">⚖️</div>
+        Registra tu primer peso para ver el gráfico
+      </div>
+    </div>
+
+    <div class="progress-stats">
+      <div class="prog-stat"><div class="prog-stat-val lost" id="statLost">—</div><div class="prog-stat-label">kg perdidos</div></div>
+      <div class="prog-stat"><div class="prog-stat-val remain" id="statRemain">12.0</div><div class="prog-stat-label">kg faltantes</div></div>
+      <div class="prog-stat"><div class="prog-stat-val weeks" id="statWeeks">—</div><div class="prog-stat-label">semanas registradas</div></div>
+      <div class="prog-stat"><div class="prog-stat-val pace" id="statPace">—</div><div class="prog-stat-label">kg/semana promedio</div></div>
+    </div>
+
+    <div class="log-list" id="logList"></div>
+  </div>
+
+  <div class="note-box">
+    ⚖️ <strong>¿Crudo o cocido?</strong> Siempre pesa <strong>en crudo</strong>. El arroz y la pasta absorben agua al cocerse y casi duplican su peso — si pesas cocido comes mucho menos de lo necesario. La carne también se pesa cruda (pierde ~25% al cocinarse: 200g crudo = ~150g cocido).
+  </div>
+
+  <div class="note-box" style="border-left-color:var(--blue)">
+    📅 <strong>Plan en 3 fases (objetivo 3 meses):</strong>
+    <br>· <strong style="color:var(--accent)">Fase 1 (semanas 1–4):</strong> 80 → ~77 kg · Cuerpo se adapta al déficit + MMA · 1.750 / 1.500 kcal
+    <br>· <strong style="color:var(--accent2)">Fase 2 (semanas 5–9):</strong> 77 → ~73 kg · Déficit mantenido + intensidad MMA crece · Evaluar en semana 7
+    <br>· <strong style="color:var(--blue)">Fase 3 (semanas 10–13):</strong> 73 → 68 kg · Si hay estancamiento, reduce 100 kcal en descanso · Cardio post-MMA opcional
+    <br><br>🥊 <strong style="color:var(--cheat)">Cheat meal semanal</strong> disponible una vez que el progreso va bien (pérdida consistente por 2+ semanas seguidas).
+  </div>
+
+  <!-- CHEAT MEAL SECTION -->
+  <div class="section-title">🍔 Cheat Meal semanal</div>
+  <div class="cheat-card">
+    <div class="cheat-glow"></div>
+    <div class="cheat-title">CHEAT MEAL</div>
+    <div class="cheat-subtitle">Una comida libre por semana · Sin frituras · Luego de 2+ semanas de progreso consistente</div>
+
+    <div class="cheat-rules">
+      <div class="cheat-rule ok">
+        <div class="cheat-rule-icon">✅</div>
+        <div class="cheat-rule-title">Sí se puede</div>
+        <div class="cheat-rule-text">Pizza casera o de restaurant · Hamburguesa al horno o plancha · Pasta con salsa cremosa · Sushi · Arroz chaufa · Cazuela completa · Completo · Postre (sin exceso)</div>
+      </div>
+      <div class="cheat-rule no">
+        <div class="cheat-rule-icon">🚫</div>
+        <div class="cheat-rule-title">Sin frituras</div>
+        <div class="cheat-rule-text">Sin papas fritas · Sin pollo frito · Sin sopaipillas · Sin empanadas fritas · Sin churros fritos · Sin nuggets. Si quieres algo crujiente: al horno o airfryer.</div>
+      </div>
+      <div class="cheat-rule ok">
+        <div class="cheat-rule-icon">📏</div>
+        <div class="cheat-rule-title">Cantidad</div>
+        <div class="cheat-rule-text">Una sola comida (no un día completo). Come normal el resto del día. No es "comer todo lo que quieras", es una comida libre sin culpa.</div>
+      </div>
+      <div class="cheat-rule ok">
+        <div class="cheat-rule-icon">📅</div>
+        <div class="cheat-rule-title">Cuándo usarla</div>
+        <div class="cheat-rule-text">Sábado o domingo ideal. Si hay reunión social en la semana, úsala ahí. No guardes 2 para la siguiente semana — es 1 por semana máximo.</div>
+      </div>
+    </div>
+
+    <div class="cheat-options">
+      <span class="cheat-option-pill">🍕 Pizza al horno</span>
+      <span class="cheat-option-pill">🍔 Hamburguesa</span>
+      <span class="cheat-option-pill">🍣 Sushi</span>
+      <span class="cheat-option-pill">🍝 Pasta cremosa</span>
+      <span class="cheat-option-pill">🌮 Tacos</span>
+      <span class="cheat-option-pill">🥗 Poke bowl</span>
+      <span class="cheat-option-pill">🍦 Helado</span>
+      <span class="cheat-option-pill">🍫 Postre real</span>
+    </div>
+
+    <div class="cheat-when">💡 <strong style="color:var(--text)">Regla de oro:</strong> si perdiste al menos 0.5 kg esa semana o las últimas 2 semanas van bien — la cheat meal es tuya. Si la semana estuvo difícil con la dieta, omítela sin drama y retómala la siguiente.</div>
+  </div>
+
+  <div class="section-title">Selecciona el día</div>
+  <div class="day-tabs">
+    <button class="day-tab active" onclick="showPlan('train',this)">🥊 Día MMA / Entreno</button>
+    <button class="day-tab rest-tab" onclick="showPlan('rest',this)">💤 Día de Descanso</button>
+  </div>
+
+  <!-- TRAINING DAY (MMA) -->
+  <div class="plan-panel active" id="plan-train">
+    <div class="kcal-badge"><div class="kcal-dot"></div><span>~1.750 kcal · Días con entrenamiento · Mar/Jue/Vie MMA 09–10:20 + otros días activos</span></div>
+    <div class="macros-row">
+      <div class="macro-card"><div class="macro-val kcal">1750</div><div class="macro-unit">Calorías</div></div>
+      <div class="macro-card"><div class="macro-val pro">165g</div><div class="macro-unit">Proteína</div></div>
+      <div class="macro-card"><div class="macro-val carb">160g</div><div class="macro-unit">Carbohidratos</div></div>
+      <div class="macro-card"><div class="macro-val fat">42g</div><div class="macro-unit">Grasas</div></div>
+    </div>
+
+    <div class="note-box" style="border-left-color:var(--accent);margin-bottom:20px">
+      🥊 <strong>Días MMA (Mar/Jue/Vie 09:00–10:20):</strong> Desayuna ~07:30 con carbos sólidos para tener energía en el tatami. Post-MMA come inmediatamente tu recuperación. El cuerpo quema más en MMA que en pesas — este plan lo contempla.
+    </div>
+
+    <div class="section-title">Comidas — día de entrenamiento</div>
+    <div class="meal-block">
+      <div class="meal-block-header"><div><div class="meal-block-time">07:30 — PRE-ENTRENAMIENTO / PRE-MMA</div><div class="meal-block-title">🌅 Desayuno</div></div><div class="meal-block-kcal">~410–440 kcal</div></div>
+      <div class="opt-tabs" id="tabs-t-d"></div><div id="panels-t-d"></div>
+    </div>
+    <div class="meal-block">
+      <div class="meal-block-header"><div><div class="meal-block-time">10:30 — POST-MMA / POST-ENTRENO</div><div class="meal-block-title">⚡ Recuperación</div></div><div class="meal-block-kcal">~250–270 kcal</div></div>
+      <div class="opt-tabs" id="tabs-t-p"></div><div id="panels-t-p"></div>
+    </div>
+    <div class="meal-block">
+      <div class="meal-block-header"><div><div class="meal-block-time">13:30 — ALMUERZO</div><div class="meal-block-title">🍽️ Almuerzo Principal</div></div><div class="meal-block-kcal">~460–490 kcal</div></div>
+      <div class="opt-tabs" id="tabs-t-a"></div><div id="panels-t-a"></div>
+    </div>
+    <div class="meal-block">
+      <div class="meal-block-header"><div><div class="meal-block-time">17:00 — COLACIÓN</div><div class="meal-block-title">🍓 Snack de la Tarde</div></div><div class="meal-block-kcal">~200–220 kcal</div></div>
+      <div class="opt-tabs" id="tabs-t-c"></div><div id="panels-t-c"></div>
+    </div>
+    <div class="meal-block">
+      <div class="meal-block-header"><div><div class="meal-block-time">20:30 — CENA</div><div class="meal-block-title">🌙 Cena</div></div><div class="meal-block-kcal">~330–360 kcal</div></div>
+      <div class="opt-tabs" id="tabs-t-n"></div><div id="panels-t-n"></div>
+    </div>
+  </div>
+
+  <!-- REST DAY -->
+  <div class="plan-panel" id="plan-rest">
+    <div class="kcal-badge"><div class="kcal-dot orange"></div><span>~1.500 kcal · Días sin entrenamiento (1–2 días/semana)</span></div>
+    <div class="macros-row">
+      <div class="macro-card"><div class="macro-val" style="color:var(--accent2)">1500</div><div class="macro-unit">Calorías</div></div>
+      <div class="macro-card"><div class="macro-val pro">150g</div><div class="macro-unit">Proteína</div></div>
+      <div class="macro-card"><div class="macro-val carb">110g</div><div class="macro-unit">Carbohidratos</div></div>
+      <div class="macro-card"><div class="macro-val fat">40g</div><div class="macro-unit">Grasas</div></div>
+    </div>
+    <div class="section-title">Comidas — día de descanso</div>
+    <div class="meal-block">
+      <div class="meal-block-header"><div><div class="meal-block-time">08:30 — DESAYUNO</div><div class="meal-block-title">🌅 Desayuno</div></div><div class="meal-block-kcal">~320–360 kcal</div></div>
+      <div class="opt-tabs" id="tabs-r-d"></div><div id="panels-r-d"></div>
+    </div>
+    <div class="meal-block">
+      <div class="meal-block-header"><div><div class="meal-block-time">13:00 — ALMUERZO</div><div class="meal-block-title">🍽️ Almuerzo</div></div><div class="meal-block-kcal">~400–430 kcal</div></div>
+      <div class="opt-tabs" id="tabs-r-a"></div><div id="panels-r-a"></div>
+    </div>
+    <div class="meal-block">
+      <div class="meal-block-header"><div><div class="meal-block-time">16:30 — COLACIÓN</div><div class="meal-block-title">🍫 Snack</div></div><div class="meal-block-kcal">~175–195 kcal</div></div>
+      <div class="opt-tabs" id="tabs-r-c"></div><div id="panels-r-c"></div>
+    </div>
+    <div class="meal-block">
+      <div class="meal-block-header"><div><div class="meal-block-time">20:00 — CENA</div><div class="meal-block-title">🌙 Cena</div></div><div class="meal-block-kcal">~260–290 kcal</div></div>
+      <div class="opt-tabs" id="tabs-r-n"></div><div id="panels-r-n"></div>
+    </div>
+  </div>
+
+  <!-- SUPLEMENTOS -->
+  <div class="section-title">Suplementación</div>
+  <div class="supplement-row">
+    <div class="suppl-pill"><div class="suppl-icon">💪</div><div><div class="suppl-name">Proteína en polvo</div><div class="suppl-when">Post-MMA / post-entreno · 1 scoop (30g)</div></div></div>
+    <div class="suppl-pill"><div class="suppl-icon">⚗️</div><div><div class="suppl-name">Creatina monohidrato 5g</div><div class="suppl-when">Todos los días — post-entreno o con colación</div></div></div>
+    <div class="suppl-pill"><div class="suppl-icon">☕</div><div><div class="suppl-name">Café negro pre-MMA</div><div class="suppl-when">07:30 antes de entrenar — sin azúcar</div></div></div>
+    <div class="suppl-pill"><div class="suppl-icon">💊</div><div><div class="suppl-name">Omega 3 (opcional)</div><div class="suppl-when">Con almuerzo · Anti-inflamatorio para recuperar del MMA</div></div></div>
+    <div class="suppl-pill"><div class="suppl-icon">🧂</div><div><div class="suppl-name">Electrolitos</div><div class="suppl-when">Post-MMA si sudas mucho — sal + limón + agua o bebida isotónica zero</div></div></div>
+  </div>
+
+  <!-- BEBIDAS Y AZÚCAR -->
+  <div class="section-title">Bebidas, azúcar y carbos — estrategia real</div>
+  <div class="swaps-row">
+    <div class="swap-card">
+      <div class="swap-title">🥤 Bebidas — transición gradual</div>
+      <div class="swap-row"><span class="swap-no">Coca-Cola / Pepsi normal</span><span style="color:var(--muted)">→</span><span class="swap-yes">Coca-Cola Zero / Pepsi Zero</span></div>
+      <div class="swap-row"><span class="swap-no">Jugos envasados azucarados</span><span style="color:var(--muted)">→</span><span class="swap-yes">Agua con limón + stevia</span></div>
+      <div class="swap-row"><span class="swap-no">Té o café con azúcar</span><span style="color:var(--muted)">→</span><span class="swap-yes">Stevia o eritritol</span></div>
+      <div class="swap-row"><span class="swap-no">Energéticas con azúcar</span><span style="color:var(--muted)">→</span><span class="swap-yes">Monster Zero / café</span></div>
+      <div class="swap-note">💡 1 bebida normal al día = ~140 kcal vacías. En Zero = 0. En un mes son ~4.200 kcal menos = casi 600g de grasa.</div>
+    </div>
+    <div class="swap-card">
+      <div class="swap-title">🍬 Azúcar — control sin tortura</div>
+      <div class="swap-row"><span class="swap-no">Azúcar blanca libre</span><span style="color:var(--muted)">→</span><span class="swap-yes">Máx 1 cdita/día + stevia</span></div>
+      <div class="swap-row"><span class="swap-no">Dulces y galletas</span><span style="color:var(--muted)">→</span><span class="swap-yes">Chocolate 85% · 2 cuadritos</span></div>
+      <div class="swap-row"><span class="swap-no">Postres azucarados</span><span style="color:var(--muted)">→</span><span class="swap-yes">Yogur griego + fruta + miel</span></div>
+      <div class="swap-row"><span class="swap-no">Manjar / mermelada</span><span style="color:var(--muted)">→</span><span class="swap-yes">Mantequilla de maní natural</span></div>
+      <div class="swap-note">💡 La pasta y el arroz ya satisfacen el antojo de carbos. No necesitas agregar azúcar encima.</div>
+    </div>
+    <div class="swap-card">
+      <div class="swap-title">🍝 Pasta y arroz — SÍ están en el plan</div>
+      <div class="swap-row"><span class="swap-yes">✓</span><span style="color:var(--muted)"></span><span style="color:var(--text)">Pasta 80g crudo — almuerzo entreno</span></div>
+      <div class="swap-row"><span class="swap-yes">✓</span><span style="color:var(--muted)"></span><span style="color:var(--text)">Arroz 70-80g crudo — almuerzo</span></div>
+      <div class="swap-row"><span class="swap-yes">✓</span><span style="color:var(--muted)"></span><span style="color:var(--text)">Pasta 50-60g crudo — cena (menor)</span></div>
+      <div class="swap-row"><span style="color:var(--accent2)">⚠</span><span style="color:var(--muted)"></span><span style="color:var(--accent2)">Sin crema ni mantequilla</span></div>
+      <div class="swap-note">💡 Pasta + pollo + tomate natural = almuerzo perfecto para días de MMA. 100% compatible con el objetivo.</div>
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="section-title">Claves del plan</div>
+  <div class="tips-grid">
+    <div class="tip-card"><div class="tip-icon">💧</div><div class="tip-title">Hidratación</div><div class="tip-text">Mínimo 3 litros de agua al día. En días de MMA agrega 500–700ml extra por el sudor. El agua controla el hambre y la retención.</div></div>
+    <div class="tip-card"><div class="tip-icon">🥩</div><div class="tip-title">Proteína primero</div><div class="tip-text">Come la proteína antes que los carbos en cada comida. Satura más rápido y preserva el músculo en déficit activo con MMA.</div></div>
+    <div class="tip-card"><div class="tip-icon">⏰</div><div class="tip-title">Timing de carbos</div><div class="tip-text">Carbos sólidos pre-MMA (07:30) y en almuerzo. En cena reduce la porción. En descanso menos carbos que en entreno.</div></div>
+    <div class="tip-card"><div class="tip-icon">🥊</div><div class="tip-title">MMA y hambre</div><div class="tip-text">El MMA genera hambre real. La recuperación post-clase (10:30) es obligatoria — nunca la saltes. Es lo que protege el músculo.</div></div>
+    <div class="tip-card"><div class="tip-icon">📉</div><div class="tip-title">Ritmo objetivo</div><div class="tip-text">Con 5–6 días de deporte, apunta a −0.8 a −1 kg/semana. Más rápido = pérdida de músculo. Más lento = ajusta la colación de descanso.</div></div>
+    <div class="tip-card"><div class="tip-icon">🔁</div><div class="tip-title">Ajuste mensual</div><div class="tip-text">Si el peso se estanca 2 semanas, reduce 100 kcal del día de descanso o agrega 15 min de cardio suave post-MMA. Nunca bajes de 1.400 kcal.</div></div>
+  </div>
+
+</div>
+
+<footer>Plan diseñado para Pablo · 80 kg → 68 kg · ~13 semanas · MMA Mar/Jue/Vie 09–10:20 · Deporte 5–6×/semana · Orientativo — consulta con nutricionista para ajuste clínico</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ─── MEAL DATA ───────────────────────────────────────────────────────────────
+const DATA = {
+  "t-d": { color:"color-orange", label:"Desayuno", options:[
+    { name:"🦃 Pavo + Avena clásica", items:[["Avena en hojuelas","55g crudo"],["Leche descremada o agua","200ml"],["Pechuga de pavo laminada","110g"],["Miel","1 cdita"],["Café negro","1 taza"]], kcal:"~420 kcal · 33g prot · 52g carb · 7g grasa" },
+    { name:"🥛 Batido + Tostada con palta", items:[["Proteína en polvo","1 scoop (30g)"],["Avena cruda mezclada","40g"],["Leche descremada","250ml"],["Pan integral tostado","1 rebanada"],["Palta","¼ unidad"]], kcal:"~430 kcal · 38g prot · 44g carb · 12g grasa" },
+    { name:"🧀 Overnight Oats con quesillo", items:[["Avena en hojuelas (remojar la noche anterior)","60g crudo"],["Quesillo / queso cottage","160g"],["Frutillas o arándanos","½ taza"],["Miel","1 cdita"],["Canela","al gusto"]], kcal:"~410 kcal · 34g prot · 48g carb · 8g grasa" },
+    { name:"🍳 Arroz + Pollo + Huevo (salado)", items:[["Arroz blanco o integral","65g crudo"],["Pechuga de pollo a la plancha","140g crudo"],["1 huevo entero revuelto","1 unidad"],["Salsa de soya baja en sodio","1 cda"]], kcal:"~415 kcal · 42g prot · 46g carb · 8g grasa", note:"💡 Tipo arroz chaufa light. Ideal si prefieres algo salado por la mañana antes del MMA." },
+    { name:"🍫 Avena dulce con proteína", items:[["Avena en hojuelas","60g crudo"],["Agua o leche descremada","200ml"],["Proteína en polvo sabor chocolate","½ scoop"],["Cacao en polvo sin azúcar","1 cdita"],["Arándanos o frutillas","½ taza"],["Stevia o miel","al gusto"]], kcal:"~420 kcal · 30g prot · 56g carb · 7g grasa", note:"💡 Sabe a postre pero es desayuno. Baja el antojo dulce de la mañana." }
+  ]},
+  "t-p": { color:"color-green", label:"Post-MMA", options:[
+    { name:"⚡ Batido + fruta pequeña", items:[["Proteína en polvo","1 scoop (30g)"],["Agua o leche descremada","250ml"],["Creatina monohidrato","5g"],["Manzana o pera mediana","1 unidad"]], kcal:"~260 kcal · 30g prot · 26g carb · 3g grasa" },
+    { name:"🍚 Arroz con pollo express", items:[["Arroz blanco","45g crudo"],["Pechuga de pollo desmenuzada","130g crudo"],["Salsa de tomate natural","3 cdas"],["Creatina monohidrato","5g"]], kcal:"~270 kcal · 35g prot · 22g carb · 5g grasa", note:"💡 Dejas preparado el día anterior y solo calientas." },
+    { name:"🧀 Quesillo + proteína + fruta", items:[["Queso cottage / quesillo","200g"],["Proteína en polvo","½ scoop (15g)"],["Uvas o frutillas","½ taza"]], kcal:"~255 kcal · 32g prot · 18g carb · 5g grasa" },
+    { name:"🍶 Yogur + fruta + creatina", items:[["Yogur griego natural sin azúcar","220g"],["Arándanos frescos","½ taza"],["Creatina monohidrato","5g"],["Miel","½ cdita"]], kcal:"~210 kcal · 22g prot · 22g carb · 4g grasa" },
+    { name:"🥙 Pan integral + pavo + batido", items:[["Pan integral","1 rebanada"],["Pechuga de pavo laminada","90g"],["Quesillo untable bajo en grasa","30g"],["Batido de proteína","½ scoop"]], kcal:"~275 kcal · 31g prot · 24g carb · 7g grasa" }
+  ]},
+  "t-a": { color:"color-blue", label:"Almuerzo", options:[
+    { name:"🍝 Pasta con pollo y tomate", items:[["Pasta (cualquier tipo)","80g crudo"],["Pechuga de pollo en trozos","200g crudo"],["Salsa de tomate natural sin azúcar","½ taza"],["Ajo, orégano, albahaca","libre"],["Aceite de oliva","½ cda"],["Ensalada verde","libre"]], kcal:"~480 kcal · 56g prot · 46g carb · 10g grasa", note:"💡 El favorito. Con 80g crudo es una buena porción para reponer después del MMA." },
+    { name:"🍚 Arroz con posta a la plancha", items:[["Arroz integral","80g crudo"],["Posta rosada o lomo liso","210g crudo"],["Ensalada de tomate y pepino","libre"],["Aceite de oliva + limón","½ cda"]], kcal:"~475 kcal · 52g prot · 42g carb · 11g grasa" },
+    { name:"🍝 Pasta con carne molida (bolognesa light)", items:[["Pasta","80g crudo"],["Carne molida vacuna magra","160g crudo"],["Salsa de tomate natural","½ taza"],["Cebolla, ajo, pimentón","libre"],["Parmesano light rallado","10g"]], kcal:"~490 kcal · 52g prot · 44g carb · 13g grasa", note:"💡 Sin crema, sin mantequilla. Bolognesa perfecta." },
+    { name:"🍗 Pollo al curry con arroz", items:[["Arroz blanco","75g crudo"],["Pechuga de pollo en trozos","210g crudo"],["Leche de coco light","50ml"],["Curry en polvo, ajo, jengibre","libre"],["Espinaca o brócoli","libre"]], kcal:"~475 kcal · 52g prot · 40g carb · 11g grasa", note:"💡 Sabor intenso. El curry y las especias no suman calorías relevantes." },
+    { name:"🥩 Vacuno + Legumbres + Ensalada", items:[["Filete vacuno magro","200g crudo"],["Lentejas o garbanzos","75g crudo"],["Tomate, cebolla en cubitos","libre"],["Aceite de oliva + limón","½ cda"]], kcal:"~470 kcal · 55g prot · 32g carb · 12g grasa" }
+  ]},
+  "t-c": { color:"color-purple", label:"Colación", options:[
+    { name:"🍓 Yogur griego + fruta", items:[["Yogur griego natural sin azúcar","170g"],["Frutillas o arándanos","½ taza"],["Miel","½ cdita"]], kcal:"~180 kcal · 17g prot · 20g carb · 3g grasa" },
+    { name:"🍫 Batido de chocolate", items:[["Proteína en polvo sabor chocolate","1 scoop"],["Agua fría","250ml"],["Cacao en polvo sin azúcar","1 cdita"]], kcal:"~160 kcal · 28g prot · 7g carb · 3g grasa", note:"💡 La colación más limpia del plan. Alta proteína, muy baja en calorías." },
+    { name:"🧀 Quesillo + fruta", items:[["Quesillo / queso cottage","160g"],["Uvas o manzana picada","½ taza"],["Canela","al gusto"]], kcal:"~185 kcal · 20g prot · 20g carb · 4g grasa" },
+    { name:"🥜 Maní + yogur griego", items:[["Maní natural sin sal","15g"],["Yogur griego natural","130g"]], kcal:"~200 kcal · 15g prot · 9g carb · 12g grasa", note:"💡 Snack portátil. Ideal fuera de casa." },
+    { name:"🍮 Mousse proteico express", items:[["Proteína en polvo sabor chocolate","1 scoop"],["Yogur griego","90g"],["Cacao en polvo sin azúcar","1 cdita"],["Stevia","al gusto"]], kcal:"~210 kcal · 29g prot · 9g carb · 4g grasa", note:"💡 Mezclas con tenedor, queda espeso y cremoso. Sabe a postre real." }
+  ]},
+  "t-n": { color:"color-pink", label:"Cena", options:[
+    { name:"🥩 Posta a la plancha + vegetales", items:[["Posta rosada o lomo liso","200g crudo"],["Brócoli + zapallo italiano al vapor","250g"],["Papa pequeña","90g crudo"],["Ajo, pimentón, orégano","libre"]], kcal:"~340 kcal · 48g prot · 20g carb · 8g grasa" },
+    { name:"🍝 Pasta con atún y tomate", items:[["Pasta","60g crudo"],["Atún en agua escurrido","150g"],["Salsa de tomate natural","½ taza"],["Aceitunas negras","6 unidades"],["Ajo, albahaca","libre"]], kcal:"~330 kcal · 42g prot · 30g carb · 7g grasa" },
+    { name:"🍗 Pollo al horno + camote pequeño", items:[["Pechuga de pollo entera","210g crudo"],["Camote / batata","90g crudo"],["Espinaca salteada con ajo","200g"],["Aceite de oliva","½ cda"]], kcal:"~325 kcal · 51g prot · 20g carb · 8g grasa" },
+    { name:"🍚 Cazuela light de pollo", items:[["Arroz blanco","50g crudo"],["Muslo de pollo sin piel","190g crudo"],["Zanahoria, cebolla, zapallo en caldo","libre"],["Perejil, comino, sal","libre"]], kcal:"~330 kcal · 42g prot · 26g carb · 9g grasa", note:"💡 Cazuela chilena controlada — reconfortante después del MMA." },
+    { name:"🥗 Ensalada completa de vacuno", items:[["Lomo liso a la plancha","190g crudo"],["Mix de hojas verdes + tomate + pepino","libre"],["Palta","¼ unidad"],["Aceite de oliva + limón + mostaza","1 cda"]], kcal:"~315 kcal · 42g prot · 7g carb · 14g grasa", note:"💡 Cena sin carbos base. Ideal si almorzaste pasta o arroz." }
+  ]},
+  "r-d": { color:"color-orange", label:"Desayuno", options:[
+    { name:"🦃 Pavo + Pan integral", items:[["Pechuga de pavo laminada","130g"],["Pan integral tostado","1 rebanada"],["Quesillo untable bajo en grasa","30g"],["Tomate en rodajas","libre"],["Café o té","1 taza"]], kcal:"~340 kcal · 34g prot · 22g carb · 10g grasa" },
+    { name:"🥛 Batido proteico matutino", items:[["Proteína en polvo","1 scoop (30g)"],["Avena cruda mezclada","35g"],["Leche descremada","200ml"],["Arándanos o frutillas","½ taza"]], kcal:"~345 kcal · 36g prot · 37g carb · 6g grasa" },
+    { name:"🧀 Overnight Oats reducido", items:[["Avena en hojuelas (remojar anoche)","55g crudo"],["Yogur griego natural","160g"],["Frutillas o arándanos","½ taza"],["Stevia o ½ cdita miel","al gusto"]], kcal:"~330 kcal · 22g prot · 44g carb · 7g grasa" },
+    { name:"🍳 Huevo + Tostada + Pavo", items:[["1 huevo entero revuelto","1 unidad"],["Pechuga de pavo laminada","110g"],["Pan integral","1 rebanada"],["Tomate y lechuga","libre"],["Café negro","1 taza"]], kcal:"~340 kcal · 34g prot · 24g carb · 11g grasa" },
+    { name:"🍫 Bowl de avena dulce reducido", items:[["Avena en hojuelas","55g crudo"],["Agua o leche descremada","200ml"],["Proteína en polvo sabor chocolate","½ scoop"],["Cacao en polvo sin azúcar","1 cdita"],["Stevia","al gusto"]], kcal:"~330 kcal · 25g prot · 46g carb · 6g grasa" }
+  ]},
+  "r-a": { color:"color-blue", label:"Almuerzo", options:[
+    { name:"🥩 Vacuno + Lentejas", items:[["Filete vacuno magro","210g crudo"],["Lentejas","70g crudo"],["Ensalada verde abundante","libre"],["Aceite de oliva","½ cda"]], kcal:"~425 kcal · 53g prot · 28g carb · 11g grasa" },
+    { name:"🍝 Pasta con pollo (día descanso)", items:[["Pasta","65g crudo"],["Pechuga de pollo","180g crudo"],["Salsa de tomate natural","½ taza"],["Ajo, albahaca, orégano","libre"],["Aceite de oliva","½ cda"]], kcal:"~420 kcal · 51g prot · 38g carb · 10g grasa" },
+    { name:"🍗 Cazuela de pollo light", items:[["Muslo de pollo sin piel","210g crudo"],["Arroz blanco","45g crudo"],["Zapallo, zanahoria, choclo","200g total"],["Caldo de verduras casero","libre"]], kcal:"~415 kcal · 46g prot · 34g carb · 10g grasa", note:"💡 Comida chilena 100% con carbos controlados." },
+    { name:"🥙 Wrap de vacuno", items:[["Tortilla integral grande","1 unidad"],["Lomo liso a la plancha","160g crudo"],["Lechuga, tomate","libre"],["Yogur griego como salsa","2 cdas"],["Limón y cilantro","libre"]], kcal:"~415 kcal · 43g prot · 30g carb · 12g grasa" },
+    { name:"🍚 Arroz + Pollo + Verduras", items:[["Arroz integral","65g crudo"],["Pechuga de pollo en tiras","190g crudo"],["Brócoli, pimentón, zapallo italiano","200g"],["Salsa de soya baja en sodio","1 cda"],["Aceite de oliva","½ cda"]], kcal:"~420 kcal · 49g prot · 36g carb · 10g grasa" }
+  ]},
+  "r-c": { color:"color-purple", label:"Colación", options:[
+    { name:"💊 Batido + creatina", items:[["Proteína en polvo","1 scoop (30g)"],["Creatina monohidrato","5g"],["Agua","250ml"],["Chocolate 85% cacao","1 cuadrito (5g)"]], kcal:"~185 kcal · 28g prot · 8g carb · 5g grasa" },
+    { name:"🧀 Quesillo + fruta", items:[["Quesillo / queso cottage","160g"],["Arándanos o frutillas","½ taza"]], kcal:"~175 kcal · 19g prot · 16g carb · 4g grasa" },
+    { name:"🍮 Yogur griego natural", items:[["Yogur griego natural sin azúcar","200g"],["Canela al gusto","libre"]], kcal:"~140 kcal · 17g prot · 9g carb · 4g grasa", note:"💡 La colación más simple. Si tienes hambre real, agrega ½ manzana." },
+    { name:"🥜 Maní + yogur", items:[["Maní natural sin sal","15g"],["Yogur griego natural","130g"]], kcal:"~200 kcal · 14g prot · 9g carb · 12g grasa", note:"💡 Snack portátil para el trabajo." },
+    { name:"🍫 Batido proteico puro", items:[["Proteína en polvo sabor chocolate","1 scoop"],["Agua fría","250ml"],["Cacao en polvo sin azúcar","1 cdita"],["Hielo","al gusto"]], kcal:"~160 kcal · 28g prot · 7g carb · 3g grasa", note:"💡 La colación más limpia. Alta proteína, calorías mínimas." }
+  ]},
+  "r-n": { color:"color-pink", label:"Cena", options:[
+    { name:"🍗 Pollo al horno + vegetales", items:[["Pechuga de pollo","210g crudo"],["Espinaca + brócoli al vapor","260g"],["Caldo de verduras","1 taza"],["Ajo, romero, limón","libre"]], kcal:"~275 kcal · 49g prot · 7g carb · 6g grasa" },
+    { name:"🥗 Ensalada completa de pollo", items:[["Pechuga de pollo grillada","190g crudo"],["Mix de hojas verdes","libre"],["Tomate, pepino","libre"],["Aceite de oliva + limón + mostaza","1 cda"]], kcal:"~285 kcal · 43g prot · 6g carb · 11g grasa" },
+    { name:"🥩 Vacuno magro + vegetales", items:[["Posta rosada a la plancha","170g crudo"],["Zapallo italiano + espinaca grillada","260g"],["Aceite de oliva","½ cda"],["Ajo y limón","libre"]], kcal:"~280 kcal · 41g prot · 7g carb · 10g grasa" },
+    { name:"🍝 Pasta mínima con atún", items:[["Pasta","45g crudo"],["Atún en agua","130g"],["Salsa de tomate natural","½ taza"],["Orégano, ajo","libre"]], kcal:"~275 kcal · 34g prot · 24g carb · 4g grasa", note:"💡 45g crudo en día de descanso — el sabor de pasta sin exceder carbos." },
+    { name:"🍲 Sopa de pollo con fideos", items:[["Pechuga de pollo desmenuzada","170g crudo"],["Zanahoria, apio, zapallo en caldo","300ml"],["Fideos finos","30g crudo"],["Perejil, sal baja, pimienta","libre"]], kcal:"~270 kcal · 39g prot · 16g carb · 5g grasa", note:"💡 Cena reconfortante y muy baja en calorías. Perfecta para días de descanso." }
+  ]}
+};
+
+function buildMeal(tabsId, panelsId, key) {
+  const data = DATA[key];
+  if (!data) return;
+  const tabsEl = document.getElementById(tabsId);
+  const panelsEl = document.getElementById(panelsId);
+  if (!tabsEl || !panelsEl) return;
+  data.options.forEach((opt, i) => {
+    const tab = document.createElement('button');
+    tab.className = 'opt-tab' + (i === 0 ? ' active' : '');
+    tab.textContent = 'Opción ' + (i + 1);
+    tab.onclick = () => {
+      tabsEl.querySelectorAll('.opt-tab').forEach(t => t.classList.remove('active'));
+      panelsEl.querySelectorAll('.opt-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      panelsEl.children[i].classList.add('active');
+    };
+    tabsEl.appendChild(tab);
+    const panel = document.createElement('div');
+    panel.className = 'opt-panel' + (i === 0 ? ' active' : '');
+    const items = opt.items.map(([n, q]) =>
+      `<li><span class="item-name">${n}</span><span class="item-qty">${q}</span></li>`
+    ).join('');
+    panel.innerHTML = `<div class="meal-card ${data.color}">
+      <div class="opt-name">${opt.name}</div>
+      <ul class="meal-items">${items}</ul>
+      <div class="meal-kcal">${opt.kcal}</div>
+      ${opt.note ? `<div class="item-note">${opt.note}</div>` : ''}
+    </div>`;
+    panelsEl.appendChild(panel);
+  });
+}
+
+buildMeal('tabs-t-d','panels-t-d','t-d');
+buildMeal('tabs-t-p','panels-t-p','t-p');
+buildMeal('tabs-t-a','panels-t-a','t-a');
+buildMeal('tabs-t-c','panels-t-c','t-c');
+buildMeal('tabs-t-n','panels-t-n','t-n');
+buildMeal('tabs-r-d','panels-r-d','r-d');
+buildMeal('tabs-r-a','panels-r-a','r-a');
+buildMeal('tabs-r-c','panels-r-c','r-c');
+buildMeal('tabs-r-n','panels-r-n','r-n');
+
+function showPlan(type, btn) {
+  document.querySelectorAll('.plan-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('plan-' + type).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── WEIGHT TRACKING ────────────────────────────────────────────────────────
+const STORAGE_KEY = 'pablo_weight_log_v2';
+const START_WEIGHT = 80;
+const GOAL_WEIGHT  = 68;
+
+function loadLog() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+}
+function saveLog(log) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(log));
+}
+
+let chart = null;
+
+function initChart(log) {
+  const ctx = document.getElementById('weightChart').getContext('2d');
+  const empty = document.getElementById('emptyChart');
+
+  if (log.length === 0) {
+    empty.style.display = 'block';
+    if (chart) { chart.destroy(); chart = null; }
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Build weekly labels
+  const labels = log.map((e, i) => i === 0 ? 'Inicio' : `Sem ${i}`);
+  const weights = log.map(e => e.w);
+
+  // Goal line
+  const goalLine = log.map(() => GOAL_WEIGHT);
+  // Ideal trajectory line
+  const totalWeeks = Math.max(13, log.length + 2);
+  const idealLine = [];
+  for (let i = 0; i < log.length; i++) {
+    idealLine.push(+(START_WEIGHT - (START_WEIGHT - GOAL_WEIGHT) * (i / 13)).toFixed(1));
+  }
+
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Tu peso',
+          data: weights,
+          borderColor: '#c8f04a',
+          backgroundColor: 'rgba(200,240,74,0.08)',
+          borderWidth: 2.5,
+          pointBackgroundColor: '#c8f04a',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: true,
+          tension: 0.35
+        },
+        {
+          label: 'Trayectoria ideal',
+          data: idealLine,
+          borderColor: '#5a8aff',
+          borderWidth: 1.5,
+          borderDash: [6,4],
+          pointRadius: 0,
+          fill: false,
+          tension: 0.1
+        },
+        {
+          label: 'Meta (68 kg)',
+          data: goalLine,
+          borderColor: '#f0a83a',
+          borderWidth: 1,
+          borderDash: [3,3],
+          pointRadius: 0,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: '#888', font: { size: 11, family: 'DM Sans' }, boxWidth: 20 }
+        },
+        tooltip: {
+          backgroundColor: '#1e1e1e',
+          borderColor: '#2a2a2a',
+          borderWidth: 1,
+          titleColor: '#f0ede8',
+          bodyColor: '#888',
+          callbacks: {
+            label: ctx => ctx.dataset.label === 'Tu peso'
+              ? ` ${ctx.raw} kg`
+              : ` ${ctx.raw} kg`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#666', font: { size: 10 } },
+          grid: { color: '#1e1e1e' }
+        },
+        y: {
+          ticks: { color: '#666', font: { size: 10 }, callback: v => v + ' kg' },
+          grid: { color: '#1e1e1e' },
+          min: Math.max(GOAL_WEIGHT - 2, Math.min(...weights) - 1),
+          max: Math.max(START_WEIGHT + 0.5, Math.max(...weights) + 0.5)
+        }
+      }
+    }
+  });
+}
+
+function updateStats(log) {
+  const statLost   = document.getElementById('statLost');
+  const statRemain = document.getElementById('statRemain');
+  const statWeeks  = document.getElementById('statWeeks');
+  const statPace   = document.getElementById('statPace');
+
+  if (log.length === 0) {
+    statLost.textContent   = '—';
+    statRemain.textContent = '12.0';
+    statWeeks.textContent  = '—';
+    statPace.textContent   = '—';
+    return;
+  }
+  const latest  = log[log.length - 1].w;
+  const lost    = +(START_WEIGHT - latest).toFixed(1);
+  const remain  = +(latest - GOAL_WEIGHT).toFixed(1);
+  const weeks   = log.length - 1;
+  const pace    = weeks > 0 ? +((START_WEIGHT - latest) / weeks).toFixed(2) : '—';
+
+  statLost.textContent   = lost >= 0 ? lost : '—';
+  statRemain.textContent = remain >= 0 ? remain : '✅';
+  statWeeks.textContent  = log.length;
+  statPace.textContent   = weeks > 0 ? pace : '—';
+}
+
+function renderLog(log) {
+  const list = document.getElementById('logList');
+  if (log.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = log.slice().reverse().map((e, ri) => {
+    const i = log.length - 1 - ri;
+    const prev = i > 0 ? log[i-1].w : null;
+    let diff = '', diffClass = '';
+    if (prev !== null) {
+      const d = +(e.w - prev).toFixed(1);
+      diff = d === 0 ? '±0' : (d > 0 ? `+${d}` : `${d}`);
+      diffClass = d < 0 ? 'down' : d > 0 ? 'up' : 'same';
+    } else {
+      diff = 'inicio';
+      diffClass = 'same';
+    }
+    const label = i === 0 ? 'Inicio' : `Semana ${i}`;
+    return `<div class="log-entry">
+      <span class="log-date">${label} · ${e.d}</span>
+      <span style="display:flex;align-items:center;gap:12px">
+        <span class="log-weight">${e.w} kg</span>
+        <span class="log-diff ${diffClass}">${diff} kg</span>
+        <button class="log-del" onclick="deleteEntry(${i})" title="Eliminar">×</button>
+      </span>
+    </div>`;
+  }).join('');
+}
+
+function refresh() {
+  const log = loadLog();
+  initChart(log);
+  updateStats(log);
+  renderLog(log);
+}
+
+function addWeight() {
+  const inp = document.getElementById('weightVal');
+  const v   = parseFloat(inp.value);
+  if (isNaN(v) || v < 40 || v > 200) { inp.style.borderColor='var(--red)'; setTimeout(()=>inp.style.borderColor='',1200); return; }
+  const log = loadLog();
+  const now = new Date();
+  const d   = now.toLocaleDateString('es-CL', { day:'2-digit', month:'short', year:'2-digit' });
+  log.push({ w: v, d });
+  saveLog(log);
+  inp.value = '';
+  refresh();
+}
+
+function clearLast() {
+  const log = loadLog();
+  if (log.length === 0) return;
+  log.pop();
+  saveLog(log);
+  refresh();
+}
+
+function deleteEntry(i) {
+  const log = loadLog();
+  log.splice(i, 1);
+  saveLog(log);
+  refresh();
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  refresh();
+  // Show install banner if on iOS
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone;
+  if (isIOS && !isStandalone) {
+    document.getElementById('installBanner').classList.add('visible');
+  }
+
+  // Enter key on weight input
+  document.getElementById('weightVal').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addWeight();
+  });
+});
+</script>
+</body>
+</html>
